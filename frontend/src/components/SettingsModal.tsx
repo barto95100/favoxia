@@ -594,10 +594,10 @@ export function SettingsModal({ isOpen, onClose, onUpdate }: SettingsModalProps)
                           setCurrentTheme(theme.id);
                           addNotification("success", "Thème appliqué", `Le thème "${theme.name}" a été activé`);
                         }}
-                        className={`group relative rounded-lg border-2 p-4 text-left transition-all duration-200 hover:scale-[1.02] hover:shadow-lg ${
+                        className={`group relative rounded-lg border-2 p-4 text-left transition-all duration-200 hover:shadow-xl hover:brightness-110 ${
                           currentTheme === theme.id
                             ? "border-[var(--bh-primary)] bg-[var(--bh-primary-muted)] shadow-md"
-                            : "border-[var(--bh-border)] bg-[var(--bh-glass-bg)] hover:border-[var(--bh-border-hover)]"
+                            : "border-[var(--bh-border)] bg-[var(--bh-glass-bg)] hover:border-[var(--bh-primary)]"
                         }`}
                       >
                         {/* Theme colors preview */}
