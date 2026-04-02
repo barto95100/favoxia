@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Bookmark, BookMarked } from "lucide-react";
+import { Bookmark, BookMarked, ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
 
 interface BrowserItem {
@@ -46,6 +46,7 @@ const BROWSER_ICONS: Record<string, string> = {
 export function Sidebar({ browsers, tags, collections, activeBrowser, activeTag, activeCollection, onBrowserClick, onTagClick, onCollectionClick }: SidebarProps) {
   const [showTags, setShowTags] = useState(true);
   const [showCollections, setShowCollections] = useState(true);
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   useEffect(() => {
     // Load preferences from localStorage
@@ -56,6 +57,12 @@ export function Sidebar({ browsers, tags, collections, activeBrowser, activeTag,
           const prefs = JSON.parse(stored);
           setShowTags(prefs.showTags ?? true);
           setShowCollections(prefs.showCollections ?? true);
+        }
+
+        // Load sidebar collapsed state
+        const collapsedState = localStorage.getItem('favoxia_sidebar_collapsed');
+        if (collapsedState !== null) {
+          setIsCollapsed(collapsedState === 'true');
         }
       } catch (error) {
         console.error('Failed to load UI preferences:', error);
@@ -75,22 +82,46 @@ export function Sidebar({ browsers, tags, collections, activeBrowser, activeTag,
     };
   }, []);
 
+  const toggleSidebar = () => {
+    const newState = !isCollapsed;
+    setIsCollapsed(newState);
+    localStorage.setItem('favoxia_sidebar_collapsed', String(newState));
+  };
+
   return (
-    <aside className="flex w-[240px] shrink-0 flex-col gap-6 border-r border-[var(--bh-border)] bg-[var(--bh-sidebar-bg)] p-4">
+    <aside className={`relative flex shrink-0 flex-col gap-6 border-r border-[var(--bh-border)] bg-[var(--bh-sidebar-bg)] p-4 transition-all duration-300 ${
+      isCollapsed ? "w-[64px]" : "w-[240px]"
+    }`}>
+      {/* Toggle Button */}
+      <button
+        onClick={toggleSidebar}
+        className="absolute -right-3 top-4 z-10 flex h-6 w-6 items-center justify-center rounded-full border border-[var(--bh-border)] bg-[var(--bh-bg-card)] text-[var(--bh-text-muted)] shadow-md transition-all hover:scale-110 hover:border-[var(--bh-primary)] hover:text-[var(--bh-primary)]"
+        title={isCollapsed ? "Ouvrir la sidebar" : "Fermer la sidebar"}
+      >
+        {isCollapsed ? <ChevronRight className="h-3 w-3" /> : <ChevronLeft className="h-3 w-3" />}
+      </button>
+
       {/* Browsers */}
       <div className="flex flex-col gap-2">
-        <h3 className="text-[11px] font-semibold uppercase tracking-wider text-[var(--bh-text-muted)]">Navigateurs</h3>
+        {!isCollapsed && (
+          <h3 className="text-[11px] font-semibold uppercase tracking-wider text-[var(--bh-text-muted)]">Navigateurs</h3>
+        )}
         {browsers.map((b) => (
           <button
             key={b.key}
             onClick={() => onBrowserClick(b.key === activeBrowser ? null : b.key)}
             className={`flex items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-colors ${
               activeBrowser === b.key ? "bg-[var(--bh-primary-muted)] text-[var(--bh-primary)]" : "text-[var(--bh-text-secondary)] hover:bg-[var(--bh-glass-bg)]"
-            }`}
+            } ${isCollapsed ? "justify-center" : ""}`}
+            title={isCollapsed ? `${b.name} (${b.count})` : undefined}
           >
             <span className="text-xs">{BROWSER_ICONS[b.key] || "🌐"}</span>
-            <span className="flex-1 text-left">{b.name}</span>
-            <span className="font-mono text-[10px] text-[var(--bh-text-muted)]">{b.count}</span>
+            {!isCollapsed && (
+              <>
+                <span className="flex-1 text-left">{b.name}</span>
+                <span className="font-mono text-[10px] text-[var(--bh-text-muted)]">{b.count}</span>
+              </>
+            )}
           </button>
         ))}
       </div>
@@ -98,9 +129,11 @@ export function Sidebar({ browsers, tags, collections, activeBrowser, activeTag,
       {/* Tags */}
       {showTags && (
         <div className="flex flex-col gap-2">
-          <h3 className="text-[11px] font-semibold uppercase tracking-wider text-[var(--bh-text-muted)]">Tags</h3>
+          {!isCollapsed && (
+            <h3 className="text-[11px] font-semibold uppercase tracking-wider text-[var(--bh-text-muted)]">Tags</h3>
+          )}
           {tags.length === 0 ? (
-            <p className="px-3 py-2 text-xs text-[var(--bh-text-muted)] italic">Aucun tag créé</p>
+            !isCollapsed && <p className="px-3 py-2 text-xs text-[var(--bh-text-muted)] italic">Aucun tag créé</p>
           ) : (
             tags.map((t) => (
               <button
@@ -108,11 +141,16 @@ export function Sidebar({ browsers, tags, collections, activeBrowser, activeTag,
                 onClick={() => onTagClick(t.name === activeTag ? null : t.name)}
                 className={`flex items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-colors ${
                   activeTag === t.name ? "bg-[var(--bh-primary-muted)] text-[var(--bh-text-primary)]" : "text-[var(--bh-text-secondary)] hover:bg-[var(--bh-glass-bg)]"
-                }`}
+                } ${isCollapsed ? "justify-center" : ""}`}
+                title={isCollapsed ? `${t.name} (${t.count})` : undefined}
               >
                 <span className="h-2 w-2 rounded-full" style={{ backgroundColor: t.color }} />
-                <span className="flex-1 text-left">{t.name}</span>
-                <span className="font-mono text-[10px] text-[var(--bh-text-muted)]">{t.count}</span>
+                {!isCollapsed && (
+                  <>
+                    <span className="flex-1 text-left">{t.name}</span>
+                    <span className="font-mono text-[10px] text-[var(--bh-text-muted)]">{t.count}</span>
+                  </>
+                )}
               </button>
             ))
           )}
@@ -122,9 +160,11 @@ export function Sidebar({ browsers, tags, collections, activeBrowser, activeTag,
       {/* Collections */}
       {showCollections && (
         <div className="flex flex-col gap-2">
-          <h3 className="text-[11px] font-semibold uppercase tracking-wider text-[var(--bh-text-muted)]">Collections</h3>
+          {!isCollapsed && (
+            <h3 className="text-[11px] font-semibold uppercase tracking-wider text-[var(--bh-text-muted)]">Collections</h3>
+          )}
           {collections.length === 0 ? (
-            <p className="px-3 py-2 text-xs text-[var(--bh-text-muted)] italic">Aucune collection créée</p>
+            !isCollapsed && <p className="px-3 py-2 text-xs text-[var(--bh-text-muted)] italic">Aucune collection créée</p>
           ) : (
             collections.map((c) => (
               <button
@@ -132,11 +172,16 @@ export function Sidebar({ browsers, tags, collections, activeBrowser, activeTag,
                 onClick={() => onCollectionClick(c.name === activeCollection ? null : c.name)}
                 className={`flex items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-colors ${
                   activeCollection === c.name ? "bg-[var(--bh-primary-muted)] text-[var(--bh-text-primary)]" : "text-[var(--bh-text-secondary)] hover:bg-[var(--bh-glass-bg)]"
-                }`}
+                } ${isCollapsed ? "justify-center" : ""}`}
+                title={isCollapsed ? `${c.name} (${c.count})` : undefined}
               >
                 <span className="text-xs">{c.icon}</span>
-                <span className="flex-1 text-left">{c.name}</span>
-                <span className="font-mono text-[10px] text-[var(--bh-text-muted)]">{c.count}</span>
+                {!isCollapsed && (
+                  <>
+                    <span className="flex-1 text-left">{c.name}</span>
+                    <span className="font-mono text-[10px] text-[var(--bh-text-muted)]">{c.count}</span>
+                  </>
+                )}
               </button>
             ))
           )}
@@ -147,10 +192,13 @@ export function Sidebar({ browsers, tags, collections, activeBrowser, activeTag,
       <div className="mt-auto">
         <Link
           href="/docs"
-          className="flex items-center gap-2 rounded-lg border border-[var(--bh-border)] bg-[var(--bh-glass-bg)] px-3 py-2.5 text-[13px] text-[var(--bh-text-secondary)] transition-all hover:border-[var(--bh-primary)] hover:bg-[var(--bh-primary-muted)] hover:text-[var(--bh-primary)] hover:scale-105"
+          className={`flex items-center gap-2 rounded-lg border border-[var(--bh-border)] bg-[var(--bh-glass-bg)] px-3 py-2.5 text-[13px] text-[var(--bh-text-secondary)] transition-all hover:border-[var(--bh-primary)] hover:bg-[var(--bh-primary-muted)] hover:text-[var(--bh-primary)] ${
+            isCollapsed ? "justify-center" : "hover:scale-105"
+          }`}
+          title={isCollapsed ? "Documentation" : undefined}
         >
           <BookMarked className="h-4 w-4" />
-          <span className="flex-1 text-left font-medium">Documentation</span>
+          {!isCollapsed && <span className="flex-1 text-left font-medium">Documentation</span>}
         </Link>
       </div>
     </aside>
