@@ -109,6 +109,22 @@ npm run dev
 - 🌐 Frontend: http://localhost:3000
 - 🔌 API: http://localhost:8000
 
+## ⏹️ Stopping
+
+### With start.sh
+
+If you launched Favoxia with `./start.sh`, simply press **Ctrl+C** in the terminal.
+
+### With stop.sh
+
+You can also stop Favoxia from any terminal:
+
+```bash
+./stop.sh
+```
+
+This script will automatically stop all backend and frontend processes.
+
 ## 📱 Usage
 
 1. **Open** http://localhost:3000 in your browser
