@@ -101,6 +101,11 @@ export function Sidebar({ browsers, tags, collections, activeBrowser, activeTag,
     localStorage.setItem('favoxia_sidebar_collapsed', String(newState));
   };
 
+  // Si toutes les sections sont désactivées, ne pas afficher la sidebar
+  if (!showBrowsers && !showTags && !showCollections) {
+    return null;
+  }
+
   return (
     <aside className={`relative flex shrink-0 flex-col gap-6 border-r border-[var(--bh-border)] bg-[var(--bh-sidebar-bg)] p-4 transition-all duration-300 ${
       isCollapsed ? "w-[64px]" : "w-[240px]"

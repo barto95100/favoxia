@@ -75,7 +75,13 @@ export function SettingsModal({ isOpen, onClose, onUpdate }: SettingsModalProps)
     try {
       const stored = localStorage.getItem('favoxia_ui_preferences');
       if (stored) {
-        setUiPreferences(JSON.parse(stored));
+        const parsedPrefs = JSON.parse(stored);
+        // Fusionner avec les valeurs par défaut pour gérer les nouvelles propriétés
+        setUiPreferences({
+          showBrowsers: parsedPrefs.showBrowsers ?? true,
+          showCollections: parsedPrefs.showCollections ?? true,
+          showTags: parsedPrefs.showTags ?? true,
+        });
       }
     } catch (error) {
       console.error('Failed to load UI preferences:', error);
