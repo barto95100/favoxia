@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { X, Trash2, Edit2, RefreshCw, Palette } from "lucide-react";
 import { api, type Tag, type Collection } from "@/lib/api";
 import { useNotifications } from "@/contexts/NotificationContext";
+import { themes, applyTheme, loadTheme } from "@/lib/themes";
 
 interface BrowserConfig {
   id: number;
@@ -38,7 +39,7 @@ const BROWSER_ICONS: Record<string, string> = {
   arc: "🟣",
 };
 
-type TabType = "browsers" | "tags" | "collections" | "interface";
+type TabType = "browsers" | "tags" | "collections" | "interface" | "themes";
 
 interface UIPreferences {
   showCollections: boolean;
@@ -58,11 +59,13 @@ export function SettingsModal({ isOpen, onClose, onUpdate }: SettingsModalProps)
     showCollections: true,
     showTags: true,
   });
+  const [currentTheme, setCurrentTheme] = useState<string>('favoxia');
 
   useEffect(() => {
     if (isOpen) {
       loadData();
       loadUIPreferences();
+      setCurrentTheme(loadTheme());
     }
   }, [isOpen]);
 
@@ -277,6 +280,17 @@ export function SettingsModal({ isOpen, onClose, onUpdate }: SettingsModalProps)
             }`}
           >
             Interface
+          </button>
+          <button
+            onClick={() => setActiveTab("themes")}
+            className={`px-4 py-2 text-sm font-medium transition-colors border-b-2 ${
+              activeTab === "themes"
+                ? "border-[var(--bh-primary)] text-[var(--bh-primary)]"
+                : "border-transparent text-[var(--bh-text-muted)] hover:text-[var(--bh-text-primary)]"
+            }`}
+          >
+            <Palette className="h-4 w-4 inline mr-1" />
+            Thèmes
           </button>
         </div>
 
@@ -561,6 +575,50 @@ export function SettingsModal({ isOpen, onClose, onUpdate }: SettingsModalProps)
                         <div className="peer h-6 w-11 rounded-full bg-[var(--bh-border)] after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-all after:content-[''] peer-checked:bg-[var(--bh-primary)] peer-checked:after:translate-x-full peer-focus:outline-none"></div>
                       </label>
                     </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Themes Tab */}
+              {activeTab === "themes" && (
+                <div className="space-y-4">
+                  <p className="text-xs text-[var(--bh-text-muted)]">
+                    Choisissez parmi plusieurs thèmes populaires. Le changement s'applique immédiatement.
+                  </p>
+                  <div className="grid grid-cols-2 gap-3">
+                    {themes.map((theme) => (
+                      <button
+                        key={theme.id}
+                        onClick={() => {
+                          applyTheme(theme.id);
+                          setCurrentTheme(theme.id);
+                          addNotification("success", "Thème appliqué", `Le thème "${theme.name}" a été activé`);
+                        }}
+                        className={`group relative rounded-lg border-2 p-4 text-left transition-all duration-200 hover:scale-105 hover:shadow-lg ${
+                          currentTheme === theme.id
+                            ? "border-[var(--bh-primary)] bg-[var(--bh-primary-muted)] shadow-md"
+                            : "border-[var(--bh-border)] bg-[var(--bh-glass-bg)] hover:border-[var(--bh-border-hover)]"
+                        }`}
+                      >
+                        {/* Theme colors preview */}
+                        <div className="mb-3 flex gap-1">
+                          <div className="h-6 w-6 rounded" style={{ backgroundColor: theme.colors.primary }} />
+                          <div className="h-6 w-6 rounded" style={{ backgroundColor: theme.colors.accentBlue }} />
+                          <div className="h-6 w-6 rounded" style={{ backgroundColor: theme.colors.accentGreen }} />
+                          <div className="h-6 w-6 rounded" style={{ backgroundColor: theme.colors.accentAmber }} />
+                        </div>
+
+                        <div className="text-sm font-semibold text-[var(--bh-text-primary)] mb-1">
+                          {theme.name}
+                          {currentTheme === theme.id && (
+                            <span className="ml-2 text-xs text-[var(--bh-primary)]">✓ Actif</span>
+                          )}
+                        </div>
+                        <div className="text-xs text-[var(--bh-text-muted)]">
+                          {theme.description}
+                        </div>
+                      </button>
+                    ))}
                   </div>
                 </div>
               )}
