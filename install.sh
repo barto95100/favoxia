@@ -112,7 +112,37 @@ cat > start.sh << 'EOF'
 
 GREEN='\033[0;32m'
 BLUE='\033[0;34m'
+RED='\033[0;31m'
 NC='\033[0m'
+
+# Fonction pour arrêter proprement les serveurs
+cleanup() {
+    echo ""
+    echo -e "${RED}⏹  Arrêt de Favoxia...${NC}"
+
+    if [ ! -z "$BACKEND_PID" ]; then
+        echo "Arrêt du backend..."
+        kill $BACKEND_PID 2>/dev/null
+    fi
+
+    if [ ! -z "$FRONTEND_PID" ]; then
+        echo "Arrêt du frontend..."
+        kill $FRONTEND_PID 2>/dev/null
+    fi
+
+    # Attendre que les processus se terminent
+    sleep 2
+
+    # Forcer l'arrêt si nécessaire
+    kill -9 $BACKEND_PID 2>/dev/null
+    kill -9 $FRONTEND_PID 2>/dev/null
+
+    echo -e "${GREEN}✅ Favoxia arrêté${NC}"
+    exit 0
+}
+
+# Capturer Ctrl+C
+trap cleanup SIGINT SIGTERM
 
 echo -e "${BLUE}🦊 Démarrage de Favoxia...${NC}"
 echo ""
@@ -143,13 +173,44 @@ echo -e "${BLUE}📱 Interface :${NC} http://localhost:3000"
 echo -e "${BLUE}🔌 API :${NC}      http://localhost:8000"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
-echo "Appuyez sur Ctrl+C pour arrêter les serveurs"
+echo -e "${BLUE}💡 Pour arrêter : Appuyez sur Ctrl+C${NC}"
+echo ""
 
 # Attendre que l'utilisateur arrête
 wait
 EOF
 
 chmod +x start.sh
+
+# Création du script d'arrêt
+cat > stop.sh << 'EOF'
+#!/bin/bash
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+NC='\033[0m'
+
+echo -e "${RED}⏹  Arrêt de Favoxia...${NC}"
+
+# Trouver et arrêter les processus backend
+BACKEND_PIDS=$(lsof -ti:8000)
+if [ ! -z "$BACKEND_PIDS" ]; then
+    echo "Arrêt du backend (port 8000)..."
+    kill $BACKEND_PIDS 2>/dev/null
+fi
+
+# Trouver et arrêter les processus frontend
+FRONTEND_PIDS=$(lsof -ti:3000)
+if [ ! -z "$FRONTEND_PIDS" ]; then
+    echo "Arrêt du frontend (port 3000)..."
+    kill $FRONTEND_PIDS 2>/dev/null
+fi
+
+sleep 2
+echo -e "${GREEN}✅ Favoxia arrêté${NC}"
+EOF
+
+chmod +x stop.sh
 
 # Succès !
 echo ""
@@ -164,6 +225,12 @@ echo ""
 echo -e "${BLUE}🚀 Pour lancer Favoxia :${NC}"
 echo ""
 echo "   ./start.sh"
+echo ""
+echo -e "${BLUE}⏹  Pour arrêter Favoxia :${NC}"
+echo ""
+echo "   Ctrl+C (dans le terminal où start.sh est lancé)"
+echo "   ou"
+echo "   ./stop.sh (pour arrêter depuis un autre terminal)"
 echo ""
 echo -e "${BLUE}📖 Documentation :${NC}"
 echo ""

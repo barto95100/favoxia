@@ -5,6 +5,9 @@ import { Providers } from "@/components/Providers";
 export const metadata: Metadata = {
   title: "Favoxia",
   description: "Synchronisez et gérez vos favoris depuis tous vos navigateurs",
+  icons: {
+    icon: '/favicon.svg',
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
