@@ -120,9 +120,9 @@ export function Sidebar({ browsers, tags, collections, activeBrowser, activeTag,
       </button>
 
       {/* Browsers */}
-      {showBrowsers && !isCollapsed && (
+      {showBrowsers && (
         <div className="flex flex-col gap-2">
-          {showText && (
+          {showText && !isCollapsed && (
             <h3 className="text-[11px] font-semibold uppercase tracking-wider text-[var(--bh-text-muted)]">Navigateurs</h3>
           )}
           {browsers.map((b) => {
@@ -137,7 +137,7 @@ export function Sidebar({ browsers, tags, collections, activeBrowser, activeTag,
               title={isCollapsed ? `${b.name} (${b.count})` : undefined}
             >
               <IconComponent className="h-4 w-4 flex-shrink-0" />
-              {showText && (
+              {showText && !isCollapsed && (
                 <>
                   <span className="flex-1 text-left">{b.name}</span>
                   <span className="font-mono text-[10px] text-[var(--bh-text-muted)]">{b.count}</span>
@@ -150,11 +150,13 @@ export function Sidebar({ browsers, tags, collections, activeBrowser, activeTag,
       )}
 
       {/* Tags */}
-      {showTags && !isCollapsed && (
+      {showTags && (
         <div className="flex flex-col gap-2">
-          <h3 className="text-[11px] font-semibold uppercase tracking-wider text-[var(--bh-text-muted)]">Tags</h3>
+          {showText && !isCollapsed && (
+            <h3 className="text-[11px] font-semibold uppercase tracking-wider text-[var(--bh-text-muted)]">Tags</h3>
+          )}
           {tags.length === 0 ? (
-            <p className="px-3 py-2 text-xs text-[var(--bh-text-muted)] italic">Aucun tag créé</p>
+            !isCollapsed && <p className="px-3 py-2 text-xs text-[var(--bh-text-muted)] italic">Aucun tag créé</p>
           ) : (
             tags.map((t) => (
               <button
@@ -162,11 +164,16 @@ export function Sidebar({ browsers, tags, collections, activeBrowser, activeTag,
                 onClick={() => onTagClick(t.name === activeTag ? null : t.name)}
                 className={`flex items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-colors ${
                   activeTag === t.name ? "bg-[var(--bh-primary-muted)] text-[var(--bh-text-primary)]" : "text-[var(--bh-text-secondary)] hover:bg-[var(--bh-glass-bg)]"
-                }`}
+                } ${isCollapsed ? "justify-center" : ""}`}
+                title={isCollapsed ? `${t.name} (${t.count})` : undefined}
               >
-                <span className="h-2 w-2 rounded-full" style={{ backgroundColor: t.color }} />
-                <span className="flex-1 text-left">{t.name}</span>
-                <span className="font-mono text-[10px] text-[var(--bh-text-muted)]">{t.count}</span>
+                <span className="h-2 w-2 rounded-full flex-shrink-0" style={{ backgroundColor: t.color }} />
+                {showText && !isCollapsed && (
+                  <>
+                    <span className="flex-1 text-left">{t.name}</span>
+                    <span className="font-mono text-[10px] text-[var(--bh-text-muted)]">{t.count}</span>
+                  </>
+                )}
               </button>
             ))
           )}
@@ -174,11 +181,13 @@ export function Sidebar({ browsers, tags, collections, activeBrowser, activeTag,
       )}
 
       {/* Collections */}
-      {showCollections && !isCollapsed && (
+      {showCollections && (
         <div className="flex flex-col gap-2">
-          <h3 className="text-[11px] font-semibold uppercase tracking-wider text-[var(--bh-text-muted)]">Collections</h3>
+          {showText && !isCollapsed && (
+            <h3 className="text-[11px] font-semibold uppercase tracking-wider text-[var(--bh-text-muted)]">Collections</h3>
+          )}
           {collections.length === 0 ? (
-            <p className="px-3 py-2 text-xs text-[var(--bh-text-muted)] italic">Aucune collection créée</p>
+            !isCollapsed && <p className="px-3 py-2 text-xs text-[var(--bh-text-muted)] italic">Aucune collection créée</p>
           ) : (
             collections.map((c) => (
               <button
@@ -186,11 +195,16 @@ export function Sidebar({ browsers, tags, collections, activeBrowser, activeTag,
                 onClick={() => onCollectionClick(c.name === activeCollection ? null : c.name)}
                 className={`flex items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-colors ${
                   activeCollection === c.name ? "bg-[var(--bh-primary-muted)] text-[var(--bh-text-primary)]" : "text-[var(--bh-text-secondary)] hover:bg-[var(--bh-glass-bg)]"
-                }`}
+                } ${isCollapsed ? "justify-center" : ""}`}
+                title={isCollapsed ? `${c.name} (${c.count})` : undefined}
               >
-                <span className="text-xs">{c.icon}</span>
-                <span className="flex-1 text-left">{c.name}</span>
-                <span className="font-mono text-[10px] text-[var(--bh-text-muted)]">{c.count}</span>
+                <span className="text-xs flex-shrink-0">{c.icon}</span>
+                {showText && !isCollapsed && (
+                  <>
+                    <span className="flex-1 text-left">{c.name}</span>
+                    <span className="font-mono text-[10px] text-[var(--bh-text-muted)]">{c.count}</span>
+                  </>
+                )}
               </button>
             ))
           )}
@@ -198,17 +212,18 @@ export function Sidebar({ browsers, tags, collections, activeBrowser, activeTag,
       )}
 
       {/* Documentation Link */}
-      {!isCollapsed && (
-        <div className="mt-auto">
-          <Link
-            href="/docs"
-            className="flex items-center gap-2 rounded-lg border border-[var(--bh-border)] bg-[var(--bh-glass-bg)] px-3 py-2.5 text-[13px] text-[var(--bh-text-secondary)] transition-all hover:border-[var(--bh-primary)] hover:bg-[var(--bh-primary-muted)] hover:text-[var(--bh-primary)] hover:scale-105"
-          >
-            <BookMarked className="h-4 w-4" />
-            <span className="flex-1 text-left font-medium">Documentation</span>
-          </Link>
-        </div>
-      )}
+      <div className="mt-auto">
+        <Link
+          href="/docs"
+          className={`flex items-center gap-2 rounded-lg border border-[var(--bh-border)] bg-[var(--bh-glass-bg)] px-3 py-2.5 text-[13px] text-[var(--bh-text-secondary)] transition-all hover:border-[var(--bh-primary)] hover:bg-[var(--bh-primary-muted)] hover:text-[var(--bh-primary)] hover:scale-105 ${
+            isCollapsed ? "justify-center" : ""
+          }`}
+          title={isCollapsed ? "Documentation" : undefined}
+        >
+          <BookMarked className="h-4 w-4 flex-shrink-0" />
+          {!isCollapsed && <span className="flex-1 text-left font-medium">Documentation</span>}
+        </Link>
+      </div>
     </aside>
   );
 }
