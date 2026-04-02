@@ -8,7 +8,7 @@ import { useNotifications, type Notification } from "@/contexts/NotificationCont
 interface NotificationCenterProps {
   isOpen: boolean;
   onClose: () => void;
-  buttonRef?: React.RefObject<HTMLButtonElement>;
+  buttonRef?: React.RefObject<HTMLButtonElement | null>;
 }
 
 function formatTime(date: Date): string {

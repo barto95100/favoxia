@@ -3,6 +3,10 @@
 import { useState, useEffect } from "react";
 import { Bookmark, BookMarked, ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
+import {
+  BROWSER_ICON_COMPONENTS,
+  DefaultBrowserIcon
+} from "./BrowserIcons";
 
 interface BrowserItem {
   name: string;
@@ -34,15 +38,6 @@ interface SidebarProps {
   onTagClick: (name: string | null) => void;
   onCollectionClick: (name: string | null) => void;
 }
-
-const BROWSER_ICONS: Record<string, string> = {
-  chrome: "🟡",
-  firefox: "🟠",
-  safari: "🔵",
-  edge: "🔷",
-  brave: "🔴",
-  arc: "🟣",
-};
 
 export function Sidebar({ browsers, tags, collections, activeBrowser, activeTag, activeCollection, onBrowserClick, onTagClick, onCollectionClick }: SidebarProps) {
   const [showTags, setShowTags] = useState(true);
@@ -122,24 +117,27 @@ export function Sidebar({ browsers, tags, collections, activeBrowser, activeTag,
         {showText && (
           <h3 className="text-[11px] font-semibold uppercase tracking-wider text-[var(--bh-text-muted)]">Navigateurs</h3>
         )}
-        {browsers.map((b) => (
-          <button
-            key={b.key}
-            onClick={() => onBrowserClick(b.key === activeBrowser ? null : b.key)}
-            className={`flex items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-colors ${
-              activeBrowser === b.key ? "bg-[var(--bh-primary-muted)] text-[var(--bh-primary)]" : "text-[var(--bh-text-secondary)] hover:bg-[var(--bh-glass-bg)]"
-            } ${isCollapsed ? "justify-center" : ""}`}
-            title={isCollapsed ? `${b.name} (${b.count})` : undefined}
-          >
-            <span className="text-xs">{BROWSER_ICONS[b.key] || "🌐"}</span>
-            {showText && (
-              <>
-                <span className="flex-1 text-left">{b.name}</span>
-                <span className="font-mono text-[10px] text-[var(--bh-text-muted)]">{b.count}</span>
-              </>
-            )}
-          </button>
-        ))}
+        {browsers.map((b) => {
+          const IconComponent = BROWSER_ICON_COMPONENTS[b.key as keyof typeof BROWSER_ICON_COMPONENTS] || DefaultBrowserIcon;
+          return (
+            <button
+              key={b.key}
+              onClick={() => onBrowserClick(b.key === activeBrowser ? null : b.key)}
+              className={`flex items-center gap-2 rounded-lg px-3 py-2 text-[13px] transition-colors ${
+                activeBrowser === b.key ? "bg-[var(--bh-primary-muted)] text-[var(--bh-primary)]" : "text-[var(--bh-text-secondary)] hover:bg-[var(--bh-glass-bg)]"
+              } ${isCollapsed ? "justify-center" : ""}`}
+              title={isCollapsed ? `${b.name} (${b.count})` : undefined}
+            >
+              <IconComponent className="h-4 w-4 flex-shrink-0" />
+              {showText && (
+                <>
+                  <span className="flex-1 text-left">{b.name}</span>
+                  <span className="font-mono text-[10px] text-[var(--bh-text-muted)]">{b.count}</span>
+                </>
+              )}
+            </button>
+          );
+        })}
       </div>
 
       {/* Tags */}

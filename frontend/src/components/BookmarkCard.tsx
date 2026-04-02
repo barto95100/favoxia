@@ -32,7 +32,7 @@ const BROWSER_COLORS: Record<string, string> = {
   arc: "#A855F7",
 };
 
-export function BookmarkCard({ bookmark, onToggleFavorite, onOpen, variant = "grid" }: BookmarkCardProps) {
+export function BookmarkCard({ bookmark, onOpen, variant = "grid" }: BookmarkCardProps) {
   const [mounted, setMounted] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [showNoteTooltip, setShowNoteTooltip] = useState(false);
