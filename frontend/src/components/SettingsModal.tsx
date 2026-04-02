@@ -42,6 +42,7 @@ const BROWSER_ICONS: Record<string, string> = {
 type TabType = "browsers" | "tags" | "collections" | "interface" | "themes";
 
 interface UIPreferences {
+  showBrowsers: boolean;
   showCollections: boolean;
   showTags: boolean;
 }
@@ -56,6 +57,7 @@ export function SettingsModal({ isOpen, onClose, onUpdate }: SettingsModalProps)
   const [editingTag, setEditingTag] = useState<{ id: number; name: string; color: string } | null>(null);
   const [editingCollection, setEditingCollection] = useState<{ id: number; name: string; icon: string } | null>(null);
   const [uiPreferences, setUiPreferences] = useState<UIPreferences>({
+    showBrowsers: true,
     showCollections: true,
     showTags: true,
   });
@@ -538,6 +540,25 @@ export function SettingsModal({ isOpen, onClose, onUpdate }: SettingsModalProps)
                     Personnalisez l'affichage de l'interface. Vous pouvez masquer ou afficher certaines sections de la sidebar.
                   </p>
                   <div className="space-y-3">
+                    {/* Browsers Toggle */}
+                    <div className="flex items-center justify-between rounded-lg border border-[var(--bh-border)] bg-[var(--bh-glass-bg)] p-4">
+                      <div className="flex-1">
+                        <div className="text-sm font-medium text-[var(--bh-text-primary)]">Afficher les navigateurs</div>
+                        <div className="text-xs text-[var(--bh-text-muted)]">
+                          Affiche la section navigateurs dans la barre latérale
+                        </div>
+                      </div>
+                      <label className="relative inline-flex cursor-pointer items-center">
+                        <input
+                          type="checkbox"
+                          checked={uiPreferences.showBrowsers}
+                          onChange={(e) => saveUIPreferences({ ...uiPreferences, showBrowsers: e.target.checked })}
+                          className="peer sr-only"
+                        />
+                        <div className="peer h-6 w-11 rounded-full bg-[var(--bh-border)] after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-all after:content-[''] peer-checked:bg-[var(--bh-primary)] peer-checked:after:translate-x-full peer-focus:outline-none"></div>
+                      </label>
+                    </div>
+
                     {/* Collections Toggle */}
                     <div className="flex items-center justify-between rounded-lg border border-[var(--bh-border)] bg-[var(--bh-glass-bg)] p-4">
                       <div className="flex-1">

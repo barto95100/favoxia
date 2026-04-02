@@ -40,6 +40,7 @@ interface SidebarProps {
 }
 
 export function Sidebar({ browsers, tags, collections, activeBrowser, activeTag, activeCollection, onBrowserClick, onTagClick, onCollectionClick }: SidebarProps) {
+  const [showBrowsers, setShowBrowsers] = useState(true);
   const [showTags, setShowTags] = useState(true);
   const [showCollections, setShowCollections] = useState(true);
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -52,6 +53,7 @@ export function Sidebar({ browsers, tags, collections, activeBrowser, activeTag,
         const stored = localStorage.getItem('favoxia_ui_preferences');
         if (stored) {
           const prefs = JSON.parse(stored);
+          setShowBrowsers(prefs.showBrowsers ?? true);
           setShowTags(prefs.showTags ?? true);
           setShowCollections(prefs.showCollections ?? true);
         }
@@ -113,11 +115,12 @@ export function Sidebar({ browsers, tags, collections, activeBrowser, activeTag,
       </button>
 
       {/* Browsers */}
-      <div className="flex flex-col gap-2">
-        {showText && (
-          <h3 className="text-[11px] font-semibold uppercase tracking-wider text-[var(--bh-text-muted)]">Navigateurs</h3>
-        )}
-        {browsers.map((b) => {
+      {showBrowsers && !isCollapsed && (
+        <div className="flex flex-col gap-2">
+          {showText && (
+            <h3 className="text-[11px] font-semibold uppercase tracking-wider text-[var(--bh-text-muted)]">Navigateurs</h3>
+          )}
+          {browsers.map((b) => {
           const IconComponent = BROWSER_ICON_COMPONENTS[b.key as keyof typeof BROWSER_ICON_COMPONENTS] || DefaultBrowserIcon;
           return (
             <button
@@ -138,7 +141,8 @@ export function Sidebar({ browsers, tags, collections, activeBrowser, activeTag,
             </button>
           );
         })}
-      </div>
+        </div>
+      )}
 
       {/* Tags */}
       {showTags && !isCollapsed && (
