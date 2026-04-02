@@ -1,0 +1,59 @@
+@import "tailwindcss";
+
+:root {
+  /* BookmarkHub Design Tokens — extracted from .pen design */
+  --bh-bg-deep: #0A0A0F;
+  --bh-bg-mid: #141420;
+  --bh-bg-card: #1A1A2E;
+  --bh-bg-card-hover: #22223A;
+  --bh-primary: #A855F7;
+  --bh-primary-muted: #A855F730;
+  --bh-accent-blue: #3B82F6;
+  --bh-accent-green: #22C55E;
+  --bh-accent-amber: #F59E0B;
+  --bh-accent-pink: #EC4899;
+  --bh-accent-cyan: #06B6D4;
+  --bh-accent-red: #EF4444;
+  --bh-text-primary: #FFFFFF;
+  --bh-text-secondary: #A1A1AA;
+  --bh-text-muted: #71717A;
+  --bh-border: rgba(255, 255, 255, 0.07);
+  --bh-border-hover: rgba(255, 255, 255, 0.12);
+  --bh-input-bg: #0F0F1A;
+  --bh-header-bg: rgba(10, 10, 15, 0.8);
+  --bh-sidebar-bg: #0F0F1A;
+  --bh-glass-bg: rgba(255, 255, 255, 0.03);
+  /* Tag colors */
+  --bh-tag-dev: #3B82F6;
+  --bh-tag-design: #EC4899;
+  --bh-tag-news: #F59E0B;
+  --bh-tag-tools: #22C55E;
+  --bh-tag-social: #06B6D4;
+  --bh-tag-work: #A855F7;
+}
+
+@layer base {
+  html, body {
+    height: 100%;
+  }
+
+  .font-primary {
+    font-family: "Inter", system-ui, sans-serif;
+  }
+
+  .font-mono {
+    font-family: "Geist Mono", "JetBrains Mono", monospace;
+  }
+}
+
+@keyframes swing {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(15deg);
+  }
+  75% {
+    transform: rotate(-15deg);
+  }
+}
