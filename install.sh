@@ -86,10 +86,18 @@ fi
 echo "Installation des dépendances Node.js..."
 npm install
 
-if [ $? -eq 0 ]; then
-    echo -e "${GREEN}✅ Frontend installé avec succès${NC}"
-else
+if [ $? -ne 0 ]; then
     echo -e "${RED}❌ Erreur lors de l'installation du frontend${NC}"
+    exit 1
+fi
+
+echo "Compilation de l'application pour la production..."
+npm run build
+
+if [ $? -eq 0 ]; then
+    echo -e "${GREEN}✅ Frontend installé et compilé avec succès${NC}"
+else
+    echo -e "${RED}❌ Erreur lors de la compilation du frontend${NC}"
     exit 1
 fi
 
@@ -113,7 +121,7 @@ echo ""
 echo -e "${GREEN}🔧 Démarrage du backend (port 8000)...${NC}"
 cd backend
 source venv/bin/activate
-uvicorn main:app --reload --host 0.0.0.0 --port 8000 &
+uvicorn main:app --host 0.0.0.0 --port 8000 &
 BACKEND_PID=$!
 cd ..
 
@@ -123,7 +131,7 @@ sleep 3
 # Démarrer le frontend
 echo -e "${GREEN}🎨 Démarrage du frontend (port 3000)...${NC}"
 cd frontend
-npm run dev &
+npm start &
 FRONTEND_PID=$!
 cd ..
 
