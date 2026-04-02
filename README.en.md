@@ -1,4 +1,4 @@
-# Favoxia 🦊
+# Favoxia
 
 [🇫🇷 Version Française](README.md) | 🇬🇧 English Version
 

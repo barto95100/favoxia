@@ -1,4 +1,6 @@
-# Favoxia 🦊
+# Favoxia
+
+🇫🇷 Version Française | [🇬🇧 English Version](README.en.md)
 
 Application de gestion centralisée de favoris multi-navigateurs avec interface moderne et synchronisation automatique.
 
