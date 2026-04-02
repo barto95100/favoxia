@@ -47,6 +47,7 @@ export function Sidebar({ browsers, tags, collections, activeBrowser, activeTag,
   const [showTags, setShowTags] = useState(true);
   const [showCollections, setShowCollections] = useState(true);
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [showText, setShowText] = useState(true);
 
   useEffect(() => {
     // Load preferences from localStorage
@@ -62,7 +63,9 @@ export function Sidebar({ browsers, tags, collections, activeBrowser, activeTag,
         // Load sidebar collapsed state
         const collapsedState = localStorage.getItem('favoxia_sidebar_collapsed');
         if (collapsedState !== null) {
-          setIsCollapsed(collapsedState === 'true');
+          const collapsed = collapsedState === 'true';
+          setIsCollapsed(collapsed);
+          setShowText(!collapsed);
         }
       } catch (error) {
         console.error('Failed to load UI preferences:', error);
@@ -84,7 +87,19 @@ export function Sidebar({ browsers, tags, collections, activeBrowser, activeTag,
 
   const toggleSidebar = () => {
     const newState = !isCollapsed;
-    setIsCollapsed(newState);
+
+    if (newState) {
+      // Si on ferme la sidebar, cacher le texte immédiatement
+      setShowText(false);
+      setIsCollapsed(true);
+    } else {
+      // Si on ouvre la sidebar, attendre la fin de l'animation avant d'afficher le texte
+      setIsCollapsed(false);
+      setTimeout(() => {
+        setShowText(true);
+      }, 250); // Délai légèrement avant la fin de l'animation (300ms)
+    }
+
     localStorage.setItem('favoxia_sidebar_collapsed', String(newState));
   };
 
@@ -103,7 +118,7 @@ export function Sidebar({ browsers, tags, collections, activeBrowser, activeTag,
 
       {/* Browsers */}
       <div className="flex flex-col gap-2">
-        {!isCollapsed && (
+        {showText && (
           <h3 className="text-[11px] font-semibold uppercase tracking-wider text-[var(--bh-text-muted)]">Navigateurs</h3>
         )}
         {browsers.map((b) => (
@@ -116,7 +131,7 @@ export function Sidebar({ browsers, tags, collections, activeBrowser, activeTag,
             title={isCollapsed ? `${b.name} (${b.count})` : undefined}
           >
             <span className="text-xs">{BROWSER_ICONS[b.key] || "🌐"}</span>
-            {!isCollapsed && (
+            {showText && (
               <>
                 <span className="flex-1 text-left">{b.name}</span>
                 <span className="font-mono text-[10px] text-[var(--bh-text-muted)]">{b.count}</span>
@@ -129,11 +144,11 @@ export function Sidebar({ browsers, tags, collections, activeBrowser, activeTag,
       {/* Tags */}
       {showTags && (
         <div className="flex flex-col gap-2">
-          {!isCollapsed && (
+          {showText && (
             <h3 className="text-[11px] font-semibold uppercase tracking-wider text-[var(--bh-text-muted)]">Tags</h3>
           )}
           {tags.length === 0 ? (
-            !isCollapsed && <p className="px-3 py-2 text-xs text-[var(--bh-text-muted)] italic">Aucun tag créé</p>
+            showText && <p className="px-3 py-2 text-xs text-[var(--bh-text-muted)] italic">Aucun tag créé</p>
           ) : (
             tags.map((t) => (
               <button
@@ -145,7 +160,7 @@ export function Sidebar({ browsers, tags, collections, activeBrowser, activeTag,
                 title={isCollapsed ? `${t.name} (${t.count})` : undefined}
               >
                 <span className="h-2 w-2 rounded-full" style={{ backgroundColor: t.color }} />
-                {!isCollapsed && (
+                {showText && (
                   <>
                     <span className="flex-1 text-left">{t.name}</span>
                     <span className="font-mono text-[10px] text-[var(--bh-text-muted)]">{t.count}</span>
@@ -160,11 +175,11 @@ export function Sidebar({ browsers, tags, collections, activeBrowser, activeTag,
       {/* Collections */}
       {showCollections && (
         <div className="flex flex-col gap-2">
-          {!isCollapsed && (
+          {showText && (
             <h3 className="text-[11px] font-semibold uppercase tracking-wider text-[var(--bh-text-muted)]">Collections</h3>
           )}
           {collections.length === 0 ? (
-            !isCollapsed && <p className="px-3 py-2 text-xs text-[var(--bh-text-muted)] italic">Aucune collection créée</p>
+            showText && <p className="px-3 py-2 text-xs text-[var(--bh-text-muted)] italic">Aucune collection créée</p>
           ) : (
             collections.map((c) => (
               <button
@@ -176,7 +191,7 @@ export function Sidebar({ browsers, tags, collections, activeBrowser, activeTag,
                 title={isCollapsed ? `${c.name} (${c.count})` : undefined}
               >
                 <span className="text-xs">{c.icon}</span>
-                {!isCollapsed && (
+                {showText && (
                   <>
                     <span className="flex-1 text-left">{c.name}</span>
                     <span className="font-mono text-[10px] text-[var(--bh-text-muted)]">{c.count}</span>
@@ -198,7 +213,7 @@ export function Sidebar({ browsers, tags, collections, activeBrowser, activeTag,
           title={isCollapsed ? "Documentation" : undefined}
         >
           <BookMarked className="h-4 w-4" />
-          {!isCollapsed && <span className="flex-1 text-left font-medium">Documentation</span>}
+          {showText && <span className="flex-1 text-left font-medium">Documentation</span>}
         </Link>
       </div>
     </aside>
