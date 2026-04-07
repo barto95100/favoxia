@@ -1,0 +1,16 @@
+# Data directory (favicons, thumbnails, etc.)
+data/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+
+# Database
+*.db
+*.sqlite
+

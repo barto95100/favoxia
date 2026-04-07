@@ -16,6 +16,7 @@ from database import init_db, get_db
 from models import Bookmark, Tag, Collection, SyncLog, BrowserConfig, bookmark_tags, bookmark_collections
 from sync import BROWSER_SYNCS
 from thumbnail_service import get_or_generate_thumbnail, generate_thumbnail
+from favicon_service import get_or_fetch_favicon, fetch_favicon, FAVICON_DIR
 from scheduler import start_scheduler, stop_scheduler
 
 
@@ -379,7 +380,8 @@ async def trigger_sync(background_tasks: BackgroundTasks, browser: str | None = 
                 continue
 
             domain = urlparse(rb.url).netloc
-            favicon = f"https://www.google.com/s2/favicons?domain={domain}&sz=64"
+            # Fetch real favicon from the website
+            favicon = await get_or_fetch_favicon(rb.url)
 
             # Validate timestamp - if invalid (before 2000 or in future), use current time
             if rb.added_at:
@@ -563,6 +565,41 @@ async def trigger_thumbnail_generation(background_tasks: BackgroundTasks, db: As
             queued += 1
 
     return {"status": "generating", "total": len(bookmarks), "queued": queued, "already_cached": len(bookmarks) - queued}
+
+
+# --- Favicons ---
+
+@app.get("/api/favicons/{filename}")
+async def get_favicon(filename: str):
+    """Serve cached favicon files."""
+    favicon_path = FAVICON_DIR / filename
+
+    if favicon_path.exists() and favicon_path.is_file():
+        return FileResponse(
+            favicon_path,
+            media_type="image/png",
+            headers={"Cache-Control": "public, max-age=604800"}  # Cache for 1 week
+        )
+
+    raise HTTPException(404, "Favicon not found")
+
+
+@app.post("/api/favicons/refresh-all")
+async def refresh_all_favicons(db: AsyncSession = Depends(get_db)):
+    """Refresh favicons for all bookmarks and update database."""
+    result = await db.execute(select(Bookmark))
+    bookmarks = result.scalars().all()
+
+    updated = 0
+    for bookmark in bookmarks:
+        # Fetch favicon synchronously and update bookmark
+        new_favicon_url = await get_or_fetch_favicon(bookmark.url)
+        if new_favicon_url != bookmark.favicon_url:
+            bookmark.favicon_url = new_favicon_url
+            updated += 1
+
+    await db.commit()
+    return {"status": "completed", "total": len(bookmarks), "updated": updated}
 
 
 def _bookmark_to_out(b: Bookmark) -> BookmarkOut:
