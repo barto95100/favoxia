@@ -108,8 +108,6 @@ async function fetchApi<T>(path: string, options?: RequestInit): Promise<T> {
   console.log(`[API] Fetching: ${API_BASE}${path}`);
   try {
     const res = await fetch(`${API_BASE}${path}`, {
-      mode: 'cors',
-      credentials: 'include',
       headers: { "Content-Type": "application/json" },
       ...options,
     });
