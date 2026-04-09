@@ -7,6 +7,7 @@ import { Sidebar } from "@/components/Sidebar";
 import { BookmarkCard } from "@/components/BookmarkCard";
 import { SettingsModal } from "@/components/SettingsModal";
 import { BookmarkDetailsModal } from "@/components/BookmarkDetailsModal";
+import { FilterPanel, type FilterOptions } from "@/components/FilterPanel";
 import { api, type Bookmark, type Tag, type Collection, type Stats, type BrowserConfig } from "@/lib/api";
 import { useNotifications } from "@/contexts/NotificationContext";
 
@@ -24,6 +25,16 @@ export default function DashboardPage() {
   // Modals
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [selectedBookmark, setSelectedBookmark] = useState<Bookmark | null>(null);
+  const [filterPanelOpen, setFilterPanelOpen] = useState(false);
+
+  // Filter options
+  const [filters, setFilters] = useState<FilterOptions>({
+    selectedTags: [],
+    selectedCollections: [],
+    hasNotes: null,
+    inCollections: null,
+    dateRange: "all",
+  });
 
   // Data from API
   const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
@@ -99,10 +110,53 @@ export default function DashboardPage() {
   // Filter bookmarks
   const filtered = bookmarks
     .filter((b) => {
+      // Sidebar filters
       if (activeBrowser && b.browser !== activeBrowser) return false;
       if (activeTag && !b.tags.some((t) => t.name === activeTag)) return false;
       if (activeCollection && !b.collections.some((c) => c.name === activeCollection)) return false;
+
+      // Search filter
       if (search && !b.title.toLowerCase().includes(search.toLowerCase()) && !b.domain.includes(search.toLowerCase())) return false;
+
+      // Advanced filters - Tags
+      if (filters.selectedTags.length > 0) {
+        if (!b.tags.some((t) => filters.selectedTags.includes(t.name))) return false;
+      }
+
+      // Advanced filters - Collections
+      if (filters.selectedCollections.length > 0) {
+        if (!b.collections.some((c) => filters.selectedCollections.includes(c.name))) return false;
+      }
+
+      // Advanced filters - Has notes
+      if (filters.hasNotes !== null) {
+        const hasNote = b.note !== null && b.note.trim() !== "";
+        if (filters.hasNotes && !hasNote) return false;
+      }
+
+      // Advanced filters - In collections
+      if (filters.inCollections !== null) {
+        const inCollection = b.collections.length > 0;
+        if (filters.inCollections && !inCollection) return false;
+      }
+
+      // Advanced filters - Date range
+      if (filters.dateRange !== "all") {
+        const addedDate = new Date(b.added_at);
+        const now = new Date();
+
+        if (filters.dateRange === "today") {
+          const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+          if (addedDate < today) return false;
+        } else if (filters.dateRange === "week") {
+          const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+          if (addedDate < weekAgo) return false;
+        } else if (filters.dateRange === "month") {
+          const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+          if (addedDate < monthAgo) return false;
+        }
+      }
+
       return true;
     })
     .sort((a, b) => {
@@ -172,6 +226,7 @@ export default function DashboardPage() {
         onSync={handleSync}
         syncing={syncing}
         onSettingsClick={() => setSettingsOpen(true)}
+        onFilterClick={() => setFilterPanelOpen(!filterPanelOpen)}
       />
       <div className="flex flex-1 overflow-hidden">
         <Sidebar
@@ -271,6 +326,14 @@ export default function DashboardPage() {
         isOpen={selectedBookmark !== null}
         onClose={() => setSelectedBookmark(null)}
         onUpdate={loadData}
+      />
+      <FilterPanel
+        isOpen={filterPanelOpen}
+        onClose={() => setFilterPanelOpen(false)}
+        filters={filters}
+        onFiltersChange={setFilters}
+        availableTags={tags}
+        availableCollections={collections}
       />
     </div>
   );

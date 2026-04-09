@@ -14,6 +14,7 @@ from models import BrowserConfig, Bookmark, SyncLog, Collection, Notification
 from sync import BROWSER_SYNCS
 from database import DATABASE_URL
 from urllib.parse import urlparse
+from favicon_service import get_or_fetch_favicon
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -81,7 +82,8 @@ async def auto_sync_browsers():
                                 continue
 
                             domain = urlparse(rb.url).netloc
-                            favicon = f"https://www.google.com/s2/favicons?domain={domain}&sz=64"
+                            # Fetch real favicon from the website
+                            favicon = await get_or_fetch_favicon(rb.url)
 
                             # Validate timestamp - if invalid (before 2000 or in future), use current time
                             if rb.added_at:

@@ -4,6 +4,7 @@
 GREEN='\033[0;32m'
 BLUE='\033[0;34m'
 RED='\033[0;31m'
+YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
 echo -e "${BLUE}"
@@ -15,6 +16,80 @@ echo "║    Installation automatique de Favoxia       ║"
 echo "║                                              ║"
 echo "╚══════════════════════════════════════════════╝"
 echo -e "${NC}"
+echo ""
+
+# Détecter l'OS
+OS="$(uname -s)"
+echo -e "${BLUE}📋 Système détecté : ${OS}${NC}"
+echo ""
+
+# --- Installation des dépendances système selon l'OS ---
+
+install_linux_deps() {
+    echo -e "${BLUE}📦 Installation des dépendances système pour Linux...${NC}"
+
+    if command -v apt-get &> /dev/null; then
+        # Debian / Ubuntu
+        sudo apt-get update -qq
+        sudo apt-get install -y --no-install-recommends \
+            python3 python3-pip python3-venv \
+            nodejs npm \
+            libnss3 libnspr4 libdbus-1-3 libatk1.0-0 libatk-bridge2.0-0 \
+            libcups2 libdrm2 libxkbcommon0 libatspi2.0-0 libxcomposite1 \
+            libxdamage1 libxfixes3 libxrandr2 libgbm1 libpango-1.0-0 \
+            libcairo2 libasound2 libx11-xcb1
+    elif command -v dnf &> /dev/null; then
+        # Fedora / RHEL
+        sudo dnf install -y python3 python3-pip nodejs npm \
+            nss nspr dbus-libs atk at-spi2-atk cups-libs libdrm \
+            libxkbcommon at-spi2-core libXcomposite libXdamage libXfixes \
+            libXrandr mesa-libgbm pango cairo alsa-lib libxcb
+    elif command -v pacman &> /dev/null; then
+        # Arch Linux
+        sudo pacman -Sy --noconfirm python python-pip nodejs npm \
+            nss nspr dbus atk at-spi2-atk libcups libdrm \
+            libxkbcommon at-spi2-core libxcomposite libxdamage libxfixes \
+            libxrandr mesa pango cairo alsa-lib libxcb
+    else
+        echo -e "${YELLOW}⚠️  Gestionnaire de paquets non reconnu. Installez manuellement :${NC}"
+        echo "   - python3, python3-pip, python3-venv"
+        echo "   - nodejs, npm"
+        echo "   - Dépendances Chromium pour Playwright (libnss3, libgbm1, etc.)"
+    fi
+}
+
+install_macos_deps() {
+    echo -e "${BLUE}📦 Vérification des dépendances pour macOS...${NC}"
+
+    if ! command -v brew &> /dev/null; then
+        echo -e "${YELLOW}⚠️  Homebrew non trouvé. Installation recommandée :${NC}"
+        echo '   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"'
+    fi
+
+    if ! command -v python3 &> /dev/null; then
+        echo -e "${YELLOW}Installation de Python via Homebrew...${NC}"
+        brew install python3
+    fi
+
+    if ! command -v node &> /dev/null; then
+        echo -e "${YELLOW}Installation de Node.js via Homebrew...${NC}"
+        brew install node
+    fi
+}
+
+case "$OS" in
+    Linux)
+        install_linux_deps
+        ;;
+    Darwin)
+        install_macos_deps
+        ;;
+    *)
+        echo -e "${RED}❌ Système non supporté : $OS${NC}"
+        exit 1
+        ;;
+esac
+
 echo ""
 
 # Vérifier Python
@@ -64,11 +139,19 @@ echo "Installation des dépendances Python..."
 pip install --upgrade pip -q
 pip install -r requirements.txt -q
 
+if [ $? -ne 0 ]; then
+    echo -e "${RED}❌ Erreur lors de l'installation des dépendances Python${NC}"
+    exit 1
+fi
+
+# Installer les navigateurs Playwright
+echo "Installation du navigateur Chromium pour Playwright..."
+playwright install chromium
+
 if [ $? -eq 0 ]; then
     echo -e "${GREEN}✅ Backend installé avec succès${NC}"
 else
-    echo -e "${RED}❌ Erreur lors de l'installation du backend${NC}"
-    exit 1
+    echo -e "${YELLOW}⚠️  Playwright Chromium n'a pas pu être installé (thumbnails/favicons désactivés)${NC}"
 fi
 
 cd ..
@@ -182,7 +265,7 @@ EOF
 
 chmod +x start.sh
 
-# Création du script d'arrêt
+# Création du script d'arrêt (compatible Linux + macOS)
 cat > stop.sh << 'EOF'
 #!/bin/bash
 
@@ -192,15 +275,27 @@ NC='\033[0m'
 
 echo -e "${RED}⏹  Arrêt de Favoxia...${NC}"
 
+# Fonction portable pour trouver les PID par port
+find_pids_by_port() {
+    local port=$1
+    if command -v lsof &> /dev/null; then
+        lsof -ti:$port 2>/dev/null
+    elif command -v ss &> /dev/null; then
+        ss -tlnp 2>/dev/null | grep ":$port " | grep -oP 'pid=\K[0-9]+'
+    elif command -v fuser &> /dev/null; then
+        fuser $port/tcp 2>/dev/null
+    fi
+}
+
 # Trouver et arrêter les processus backend
-BACKEND_PIDS=$(lsof -ti:8000)
+BACKEND_PIDS=$(find_pids_by_port 8000)
 if [ ! -z "$BACKEND_PIDS" ]; then
     echo "Arrêt du backend (port 8000)..."
     kill $BACKEND_PIDS 2>/dev/null
 fi
 
 # Trouver et arrêter les processus frontend
-FRONTEND_PIDS=$(lsof -ti:3000)
+FRONTEND_PIDS=$(find_pids_by_port 3000)
 if [ ! -z "$FRONTEND_PIDS" ]; then
     echo "Arrêt du frontend (port 3000)..."
     kill $FRONTEND_PIDS 2>/dev/null

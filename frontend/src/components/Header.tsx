@@ -13,9 +13,10 @@ interface HeaderProps {
   onSync?: () => void;
   syncing?: boolean;
   onSettingsClick?: () => void;
+  onFilterClick?: () => void;
 }
 
-export function Header({ search, onSearchChange, onSync, syncing, onSettingsClick }: HeaderProps) {
+export function Header({ search, onSearchChange, onSync, syncing, onSettingsClick, onFilterClick }: HeaderProps) {
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const { unreadCount } = useNotifications();
   const bellButtonRef = useRef<HTMLButtonElement>(null);
@@ -32,7 +33,7 @@ export function Header({ search, onSearchChange, onSync, syncing, onSettingsClic
 
       {/* Search */}
       <div className="w-[400px]">
-        <SearchBar value={search} onChange={onSearchChange} />
+        <SearchBar value={search} onChange={onSearchChange} onFilterClick={onFilterClick} />
       </div>
 
       {/* Right actions */}

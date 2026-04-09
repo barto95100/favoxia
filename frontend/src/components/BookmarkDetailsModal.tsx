@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { X, Tag as TagIcon, Plus, Trash2, ExternalLink, Copy, Save, Calendar, Globe, Server, StickyNote, CheckCircle2, AlertCircle, TrendingUp, Monitor, FolderOpen } from "lucide-react";
-import { api, type Bookmark, type Tag, type Collection, type BookmarkMetadata } from "@/lib/api";
+import { api, API_BASE, type Bookmark, type Tag, type Collection, type BookmarkMetadata } from "@/lib/api";
 
 interface BookmarkDetailsModalProps {
   bookmark: Bookmark | null;
@@ -377,7 +377,7 @@ export function BookmarkDetailsModal({ bookmark, isOpen, onClose, onUpdate }: Bo
               {/* Right: Thumbnail Preview */}
               <div className="flex-1 flex items-center justify-center">
                 <img
-                  src={`http://localhost:8000/api/thumbnails/${bookmark.id}`}
+                  src={`${API_BASE}/api/thumbnails/${bookmark.id}`}
                   alt={bookmark.title}
                   className="max-w-full rounded-xl border border-[var(--bh-border)] shadow-md"
                   style={{ maxHeight: '400px' }}

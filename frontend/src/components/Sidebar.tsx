@@ -221,7 +221,7 @@ export function Sidebar({ browsers, tags, collections, activeBrowser, activeTag,
           title={isCollapsed ? "Documentation" : undefined}
         >
           <BookMarked className="h-4 w-4 flex-shrink-0" />
-          {!isCollapsed && <span className="flex-1 text-left font-medium">Documentation</span>}
+          {showText && !isCollapsed && <span className="flex-1 text-left font-medium">Documentation</span>}
         </Link>
       </div>
     </aside>

@@ -1,5 +1,6 @@
 import hashlib
 import asyncio
+import platform
 from pathlib import Path
 from playwright.async_api import async_playwright
 from PIL import Image
@@ -32,10 +33,6 @@ async def generate_thumbnail(url: str, width: int = 600, height: int = 400) -> P
     if thumbnail_path.exists():
         return thumbnail_path
 
-    # Skip local/internal addresses
-    if any(pattern in url.lower() for pattern in ['localhost', '127.0.0.1', '10.', '192.168.', '172.']):
-        return None
-
     try:
         async with async_playwright() as p:
             browser = await p.chromium.launch(
@@ -43,9 +40,14 @@ async def generate_thumbnail(url: str, width: int = 600, height: int = 400) -> P
                 args=['--no-sandbox', '--disable-setuid-sandbox']
             )
 
+            if platform.system() == "Darwin":
+                ua = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36'
+            else:
+                ua = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+
             context = await browser.new_context(
                 viewport={'width': 1280, 'height': 800},
-                user_agent='Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36'
+                user_agent=ua
             )
 
             page = await context.new_page()

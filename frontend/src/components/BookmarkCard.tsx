@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { ExternalLink, MoreHorizontal, StickyNote, FolderOpen, Folder, Pencil } from "lucide-react";
 import { TagPill } from "./TagPill";
+import { API_BASE } from "@/lib/api";
 import type { Bookmark } from "@/lib/api";
 
 interface BookmarkCardProps {
@@ -178,7 +179,7 @@ export function BookmarkCard({ bookmark, onOpen, variant = "grid" }: BookmarkCar
           <img
             src={bookmark.favicon_url || `https://www.google.com/s2/favicons?domain=${bookmark.domain}&sz=64`}
             alt=""
-            className="h-5 w-5 rounded"
+            className="h-6 w-6 rounded"
           />
           <span className="flex-1 truncate text-sm font-medium">{bookmark.title}</span>
           {bookmark.folder && (
@@ -243,7 +244,7 @@ export function BookmarkCard({ bookmark, onOpen, variant = "grid" }: BookmarkCar
       <div className="rounded-xl border-2 border-[var(--bh-border)] bg-[var(--bh-bg-card)] p-3 shadow-2xl backdrop-blur-xl">
         <div className="relative h-[180px] w-full overflow-hidden rounded-lg bg-[var(--bh-glass-bg)]">
           <img
-            src={`http://localhost:8000/api/thumbnails/${bookmark.id}`}
+            src={`${API_BASE}/api/thumbnails/${bookmark.id}`}
             alt={`Aperçu de ${bookmark.title}`}
             className="h-full w-full object-cover"
             loading="lazy"
@@ -287,13 +288,13 @@ export function BookmarkCard({ bookmark, onOpen, variant = "grid" }: BookmarkCar
       {/* Top: Favicon + Title + Note + Star */}
       <div className="flex items-center gap-2.5">
         <div
-          className="flex h-7 w-7 items-center justify-center rounded-lg"
+          className="flex h-8 w-8 items-center justify-center rounded-lg"
           style={{ backgroundColor: `${browserColor}20` }}
         >
           <img
             src={bookmark.favicon_url || `https://www.google.com/s2/favicons?domain=${bookmark.domain}&sz=64`}
             alt=""
-            className="h-4 w-4"
+            className="h-6 w-6"
           />
         </div>
         <div className="flex flex-1 flex-col gap-px min-w-0">

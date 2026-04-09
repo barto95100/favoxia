@@ -4,14 +4,18 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - ./backend:/app
       - bookmark-data:/app/data
     environment:
       - DATABASE_URL=sqlite+aiosqlite:///./data/bookmarkhub.db
-    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+      - API_BASE_URL=http://localhost:8000
+      - CORS_ORIGINS=http://localhost:3000
+    command: uvicorn main:app --host 0.0.0.0 --port 8000
 
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
+      args:
+        - NEXT_PUBLIC_API_URL=http://localhost:8000
     ports:
       - "3000:3000"
     environment:

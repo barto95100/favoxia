@@ -12,39 +12,59 @@ Application de gestion centralisée de favoris multi-navigateurs avec interface 
 - ✅ **Recherche puissante** : Recherche instantanée dans tous vos favoris
 - ✅ **Organisation** : Tags, collections et dossiers
 - ✅ **Aperçus visuels** : Thumbnails automatiques des sites
-- ✅ **Multi-plateforme** : macOS, Windows, Linux
+- ✅ **Favicons réels** : Récupération automatique des icônes de chaque site
+- ✅ **Multi-plateforme** : macOS et Linux
 
 ## 📋 Prérequis
 
 - **Python 3.11+** (backend)
 - **Node.js 18+** (frontend)
-- **npm** ou **yarn**
+- **npm**
 
 ## 🚀 Installation
 
 ### Méthode 1 : Installation automatique (⭐ Recommandé)
 
-La méthode la plus simple pour installer Favoxia :
+La méthode la plus simple, fonctionne sur **macOS** et **Linux** :
 
 ```bash
 # Cloner le projet
-git clone https://github.com/votre-username/favoxia.git
+git clone https://github.com/barto95100/favoxia.git
 cd favoxia
 
 # Lancer l'installation automatique
+chmod +x install.sh
 ./install.sh
 ```
 
-Le script `install.sh` va automatiquement :
-- ✅ Vérifier que Python 3.11+ et Node.js 18+ sont installés
-- ✅ Créer l'environnement virtuel Python
-- ✅ Installer toutes les dépendances backend
-- ✅ Installer toutes les dépendances frontend
-- ✅ Créer le script de lancement `start.sh`
+Le script `install.sh` détecte automatiquement votre OS et :
+- ✅ **Linux** : Installe les dépendances système (apt/dnf/pacman) pour Playwright
+- ✅ **macOS** : Vérifie Homebrew, Python et Node.js
+- ✅ Crée l'environnement virtuel Python
+- ✅ Installe toutes les dépendances backend (y compris Playwright + Chromium)
+- ✅ Installe et compile le frontend en mode production
+- ✅ Crée les scripts `start.sh` et `stop.sh`
 
-### Méthode 2 : Installation manuelle
+### Méthode 2 : Docker (🐳)
 
-Si vous préférez installer manuellement :
+```bash
+git clone https://github.com/barto95100/favoxia.git
+cd favoxia
+
+# Lancer avec Docker Compose
+docker compose up -d
+```
+
+L'application sera accessible sur http://localhost:3000
+
+Pour une IP/domaine différent de localhost, modifiez les variables dans `docker-compose.yml` :
+```yaml
+environment:
+  - API_BASE_URL=http://VOTRE-IP:8000
+  - CORS_ORIGINS=http://VOTRE-IP:3000
+```
+
+### Méthode 3 : Installation manuelle
 
 <details>
 <summary>Cliquez pour voir les instructions détaillées</summary>
@@ -52,24 +72,47 @@ Si vous préférez installer manuellement :
 #### 1. Cloner le projet
 
 ```bash
-git clone https://github.com/votre-username/favoxia.git
+git clone https://github.com/barto95100/favoxia.git
 cd favoxia
 ```
 
-#### 2. Installer le backend
+#### 2. Installer les dépendances système (Linux uniquement)
+
+Sur Ubuntu/Debian :
+```bash
+sudo apt-get install -y libnss3 libnspr4 libdbus-1-3 libatk1.0-0 \
+  libatk-bridge2.0-0 libcups2 libdrm2 libxkbcommon0 libatspi2.0-0 \
+  libxcomposite1 libxdamage1 libxfixes3 libxrandr2 libgbm1 \
+  libpango-1.0-0 libcairo2 libasound2 libx11-xcb1
+```
+
+Sur Fedora/RHEL :
+```bash
+sudo dnf install -y nss nspr dbus-libs atk at-spi2-atk cups-libs libdrm \
+  libxkbcommon at-spi2-core libXcomposite libXdamage libXfixes \
+  libXrandr mesa-libgbm pango cairo alsa-lib libxcb
+```
+
+> Sur macOS, aucune dépendance système supplémentaire n'est nécessaire.
+
+#### 3. Installer le backend
 
 ```bash
 cd backend
 python3 -m venv venv
-source venv/bin/activate  # Sur Windows: venv\Scripts\activate
+source venv/bin/activate
 pip install -r requirements.txt
+playwright install chromium
+cd ..
 ```
 
-#### 3. Installer le frontend
+#### 4. Installer le frontend
 
 ```bash
-cd ../frontend
+cd frontend
 npm install
+npm run build
+cd ..
 ```
 
 </details>
@@ -86,21 +129,19 @@ Le script lancera automatiquement le backend ET le frontend.
 
 ### Lancement manuel
 
-Si vous avez fait l'installation manuelle :
-
 **Terminal 1 - Backend (API) :**
 
 ```bash
 cd backend
 source venv/bin/activate
-uvicorn main:app --reload --host 0.0.0.0 --port 8000
+uvicorn main:app --host 0.0.0.0 --port 8000
 ```
 
 **Terminal 2 - Frontend :**
 
 ```bash
 cd frontend
-npm run dev
+npm start
 ```
 
 ---
@@ -134,6 +175,8 @@ Ce script arrêtera automatiquement tous les processus backend et frontend.
 
 ## ⚙️ Configuration
 
+### Interface
+
 Dans l'interface des paramètres, vous pouvez configurer :
 
 **Onglet "Navigateurs" :**
@@ -147,7 +190,15 @@ Dans l'interface des paramètres, vous pouvez configurer :
 
 **Synchronisation automatique :**
 - La synchronisation automatique est active par défaut (toutes les 5 minutes)
-- Pour modifier la fréquence, voir la section "Configuration avancée" ci-dessous
+
+### Variables d'environnement
+
+| Variable | Description | Valeur par défaut |
+|----------|-------------|-------------------|
+| `DATABASE_URL` | URL de connexion SQLite | `sqlite+aiosqlite:///./favoxia.db` |
+| `API_BASE_URL` | URL publique du backend | `http://localhost:8000` |
+| `CORS_ORIGINS` | Origines autorisées (séparées par `,`) | `http://localhost:3000` |
+| `NEXT_PUBLIC_API_URL` | URL du backend pour le frontend | `http://localhost:8000` |
 
 ### Configuration avancée
 
@@ -156,25 +207,25 @@ Dans l'interface des paramètres, vous pouvez configurer :
 Éditez le fichier `backend/models.py` :
 ```python
 class BrowserConfig(Base):
-    sync_frequency: Mapped[int] = mapped_column(Integer, default=5)  # Modifier cette valeur (en minutes)
+    sync_frequency: Mapped[int] = mapped_column(Integer, default=5)  # en minutes
 ```
-
-Ou directement dans la base de données `favoxia.db` après la première synchronisation.
 
 **Base de données :**
 
-Favoxia utilise SQLite (`favoxia.db`) - aucune configuration requise, fonctionne directement !
+Favoxia utilise SQLite - aucune configuration requise, fonctionne directement !
 
 ## 🌐 Support navigateurs
 
-| Navigateur | macOS | Windows | Linux |
-|------------|-------|---------|-------|
-| Chrome     | ✅    | ✅      | ✅    |
-| Firefox    | ✅    | ✅      | ✅    |
-| Edge       | ✅    | ✅      | ✅    |
-| Brave      | ✅    | ✅      | ✅    |
-| Safari     | ✅    | ❌      | ❌    |
-| Arc        | ✅    | ❌      | ❌    |
+| Navigateur | macOS | Linux |
+|------------|-------|-------|
+| Chrome     | ✅    | ✅    |
+| Firefox    | ✅    | ✅    |
+| Edge       | ✅    | ✅    |
+| Brave      | ✅    | ✅    |
+| Safari     | ✅    | ❌    |
+| Arc        | ✅    | ❌    |
+
+> Safari et Arc sont exclusifs à macOS et ne sont pas disponibles sur Linux.
 
 ## 🛠️ Technologies
 
@@ -182,7 +233,8 @@ Favoxia utilise SQLite (`favoxia.db`) - aucune configuration requise, fonctionne
 - FastAPI (Python)
 - SQLAlchemy (ORM)
 - APScheduler (synchronisation automatique)
-- Playwright (thumbnails)
+- Playwright (thumbnails & favicons)
+- Pillow (redimensionnement d'images)
 
 **Frontend :**
 - Next.js 15
@@ -199,6 +251,8 @@ favoxia/
 │   ├── models.py            # Modèles de données
 │   ├── database.py          # Configuration DB
 │   ├── scheduler.py         # Synchronisation auto
+│   ├── favicon_service.py   # Récupération des favicons
+│   ├── thumbnail_service.py # Génération des thumbnails
 │   ├── sync/                # Modules de synchro par navigateur
 │   │   ├── chrome.py
 │   │   ├── firefox.py
@@ -206,14 +260,20 @@ favoxia/
 │   │   ├── edge.py
 │   │   ├── brave.py
 │   │   └── arc.py
-│   └── requirements.txt
-└── frontend/
-    ├── src/
-    │   ├── app/             # Routes Next.js
-    │   ├── components/      # Composants React
-    │   └── styles/
-    ├── package.json
-    └── tsconfig.json
+│   ├── data/                # Données (favicons, thumbnails, DB)
+│   ├── requirements.txt
+│   └── Dockerfile
+├── frontend/
+│   ├── src/
+│   │   ├── app/             # Routes Next.js
+│   │   ├── components/      # Composants React
+│   │   └── lib/             # API client
+│   ├── package.json
+│   └── Dockerfile
+├── docker-compose.yml
+├── install.sh               # Installation automatique
+├── start.sh                 # Lancement (généré par install.sh)
+└── stop.sh                  # Arrêt (généré par install.sh)
 ```
 
 ## 🐛 Dépannage
@@ -221,15 +281,24 @@ favoxia/
 ### Le backend ne démarre pas
 - Vérifiez que Python 3.11+ est installé : `python3 --version`
 - Vérifiez que le venv est activé : vous devriez voir `(venv)` dans votre terminal
+- Sur Linux, vérifiez les dépendances Playwright : `playwright install-deps`
+
+### Les thumbnails/favicons ne fonctionnent pas
+- Vérifiez que Chromium est installé : `playwright install chromium`
+- Sur Linux, installez les dépendances système (voir section Installation manuelle)
 
 ### Le frontend ne démarre pas
-- Vérifiez que Node.js est installé : `node --version`
+- Vérifiez que Node.js 18+ est installé : `node --version`
 - Supprimez `node_modules` et réinstallez : `rm -rf node_modules && npm install`
 
 ### Aucun favori n'est importé
 - Vérifiez que le navigateur est bien installé sur votre système
 - Vérifiez les logs du backend pour voir les erreurs éventuelles
 - Assurez-vous que le navigateur n'est pas en cours d'exécution (pour éviter les verrous de fichiers)
+
+### Problèmes de connexion frontend/backend
+- Vérifiez que les ports 3000 et 8000 sont libres
+- Si vous accédez depuis une autre machine, configurez `CORS_ORIGINS` et `NEXT_PUBLIC_API_URL`
 
 ## 🤝 Contribution
 
@@ -241,10 +310,6 @@ Les contributions sont les bienvenues ! N'hésitez pas à :
 ## 📄 Licence
 
 MIT License - Libre d'utilisation et de modification
-
-## 🙏 Remerciements
-
-Développé avec ❤️ pour centraliser et organiser tous vos favoris en un seul endroit.
 
 ---
 
