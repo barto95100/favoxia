@@ -1,4 +1,29 @@
-export const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+function getApiBase(): string {
+  // 1. Si une variable d'env est définie au build, l'utiliser
+  if (process.env.NEXT_PUBLIC_API_URL) {
+    return process.env.NEXT_PUBLIC_API_URL;
+  }
+  // 2. Côté navigateur : utiliser le même hostname que la page, port 8000
+  if (typeof window !== "undefined") {
+    return `${window.location.protocol}//${window.location.hostname}:8000`;
+  }
+  // 3. Fallback SSR
+  return "http://localhost:8000";
+}
+
+export const API_BASE = getApiBase();
+
+export function faviconSrc(bookmark: { favicon_url: string | null; domain: string }): string {
+  if (!bookmark.favicon_url) {
+    return `https://www.google.com/s2/favicons?domain=${bookmark.domain}&sz=64`;
+  }
+  // URL relative (/api/favicons/...) -> préfixer avec API_BASE
+  if (bookmark.favicon_url.startsWith("/")) {
+    return `${API_BASE}${bookmark.favicon_url}`;
+  }
+  // URL absolue (http://...) -> utiliser telle quelle (rétrocompatibilité)
+  return bookmark.favicon_url;
+}
 
 export interface Tag {
   id: number;

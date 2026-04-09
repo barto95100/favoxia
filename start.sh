@@ -8,6 +8,14 @@ NC='\033[0m'
 # Se placer dans le dossier du script
 cd "$(dirname "$0")"
 
+# Détecter l'IP locale
+if command -v hostname &> /dev/null && hostname -I &> /dev/null; then
+    LOCAL_IP=$(hostname -I | awk '{print $1}')
+elif command -v ipconfig &> /dev/null; then
+    LOCAL_IP=$(ipconfig getifaddr en0 2>/dev/null || ipconfig getifaddr en1 2>/dev/null)
+fi
+LOCAL_IP=${LOCAL_IP:-localhost}
+
 # Fonction pour arrêter proprement les serveurs
 cleanup() {
     echo ""
@@ -61,10 +69,13 @@ cd ..
 echo ""
 echo -e "${GREEN}✅ Favoxia est en cours de démarrage !${NC}"
 echo ""
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo -e "${BLUE}📱 Interface :${NC} http://localhost:3000"
-echo -e "${BLUE}🔌 API :${NC}      http://localhost:8000"
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo -e "${BLUE}📱 Interface (local) :${NC}  http://localhost:3000"
+if [ "$LOCAL_IP" != "localhost" ]; then
+echo -e "${BLUE}📱 Interface (réseau) :${NC} http://${LOCAL_IP}:3000"
+fi
+echo -e "${BLUE}🔌 API :${NC}               http://localhost:8000"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
 echo -e "${BLUE}💡 Pour arrêter : Appuyez sur Ctrl+C${NC}"
 echo ""

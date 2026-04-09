@@ -4,7 +4,6 @@ Tries multiple strategies to get the best quality favicon.
 """
 import hashlib
 import logging
-import os
 from pathlib import Path
 from urllib.parse import urljoin, urlparse
 import aiohttp
@@ -78,10 +77,9 @@ def get_favicon_path(url: str) -> Path:
 
 
 def get_favicon_url_for_domain(domain: str) -> str:
-    """Generate the local API URL for a favicon based on domain."""
+    """Generate the API path for a favicon based on domain."""
     domain_hash = hashlib.md5(domain.encode()).hexdigest()
-    api_base = os.getenv("API_BASE_URL", "http://localhost:8000")
-    return f"{api_base}/api/favicons/{domain_hash}.png"
+    return f"/api/favicons/{domain_hash}.png"
 
 
 async def fetch_favicon(url: str) -> Path | None:

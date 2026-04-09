@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { ExternalLink, MoreHorizontal, StickyNote, FolderOpen, Folder, Pencil } from "lucide-react";
 import { TagPill } from "./TagPill";
-import { API_BASE } from "@/lib/api";
+import { API_BASE, faviconSrc } from "@/lib/api";
 import type { Bookmark } from "@/lib/api";
 
 interface BookmarkCardProps {
@@ -177,7 +177,7 @@ export function BookmarkCard({ bookmark, onOpen, variant = "grid" }: BookmarkCar
           onClick={() => window.open(bookmark.url, '_blank')}
         >
           <img
-            src={bookmark.favicon_url || `https://www.google.com/s2/favicons?domain=${bookmark.domain}&sz=64`}
+            src={faviconSrc(bookmark)}
             alt=""
             className="h-6 w-6 rounded"
           />
@@ -292,7 +292,7 @@ export function BookmarkCard({ bookmark, onOpen, variant = "grid" }: BookmarkCar
           style={{ backgroundColor: `${browserColor}20` }}
         >
           <img
-            src={bookmark.favicon_url || `https://www.google.com/s2/favicons?domain=${bookmark.domain}&sz=64`}
+            src={faviconSrc(bookmark)}
             alt=""
             className="h-6 w-6"
           />
