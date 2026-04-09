@@ -58,7 +58,11 @@ brew install python3 node
 **Ubuntu / Debian :**
 ```bash
 sudo apt-get update
-sudo apt-get install -y python3 python3-pip python3-venv nodejs npm
+sudo apt-get install -y python3 python3-pip python3-venv curl git
+
+# Installer Node.js 20 (la version des depots Ubuntu est souvent trop ancienne)
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+sudo apt-get install -y nodejs
 
 # Dependances pour Playwright (Chromium headless)
 sudo apt-get install -y libnss3 libnspr4 libdbus-1-3 libatk1.0-0 \
@@ -66,6 +70,8 @@ sudo apt-get install -y libnss3 libnspr4 libdbus-1-3 libatk1.0-0 \
   libxcomposite1 libxdamage1 libxfixes3 libxrandr2 libgbm1 \
   libpango-1.0-0 libcairo2 libasound2 libx11-xcb1
 ```
+
+> **Note :** Sur Ubuntu 22.04, le paquet `nodejs` des depots officiels est en version 12, trop ancienne pour Favoxia. L'installation via NodeSource ci-dessus fournit Node.js 20.
 
 **Fedora / RHEL :**
 ```bash

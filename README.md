@@ -76,24 +76,40 @@ git clone https://github.com/barto95100/favoxia.git
 cd favoxia
 ```
 
-#### 2. Installer les dépendances système (Linux uniquement)
+#### 2. Installer les prérequis système
 
-Sur Ubuntu/Debian :
+**macOS :**
 ```bash
+# Installer Homebrew si pas déjà fait
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+# Installer Python et Node.js
+brew install python3 node
+```
+
+**Ubuntu / Debian :**
+```bash
+sudo apt-get update
+sudo apt-get install -y python3 python3-pip python3-venv curl
+
+# Installer Node.js 20 (les dépôts Ubuntu fournissent souvent une version trop ancienne)
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+sudo apt-get install -y nodejs
+
+# Dépendances système pour Playwright (Chromium headless)
 sudo apt-get install -y libnss3 libnspr4 libdbus-1-3 libatk1.0-0 \
   libatk-bridge2.0-0 libcups2 libdrm2 libxkbcommon0 libatspi2.0-0 \
   libxcomposite1 libxdamage1 libxfixes3 libxrandr2 libgbm1 \
   libpango-1.0-0 libcairo2 libasound2 libx11-xcb1
 ```
 
-Sur Fedora/RHEL :
+**Fedora / RHEL :**
 ```bash
-sudo dnf install -y nss nspr dbus-libs atk at-spi2-atk cups-libs libdrm \
+sudo dnf install -y python3 python3-pip nodejs npm \
+  nss nspr dbus-libs atk at-spi2-atk cups-libs libdrm \
   libxkbcommon at-spi2-core libXcomposite libXdamage libXfixes \
   libXrandr mesa-libgbm pango cairo alsa-lib libxcb
 ```
-
-> Sur macOS, aucune dépendance système supplémentaire n'est nécessaire.
 
 #### 3. Installer le backend
 

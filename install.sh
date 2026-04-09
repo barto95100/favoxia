@@ -32,12 +32,27 @@ install_linux_deps() {
         # Debian / Ubuntu
         sudo apt-get update -qq
         sudo apt-get install -y --no-install-recommends \
-            python3 python3-pip python3-venv \
-            nodejs npm \
+            python3 python3-pip python3-venv curl git \
             libnss3 libnspr4 libdbus-1-3 libatk1.0-0 libatk-bridge2.0-0 \
             libcups2 libdrm2 libxkbcommon0 libatspi2.0-0 libxcomposite1 \
             libxdamage1 libxfixes3 libxrandr2 libgbm1 libpango-1.0-0 \
             libcairo2 libasound2 libx11-xcb1
+
+        # Vérifier la version de Node.js (besoin de 18+)
+        NODE_OK=false
+        if command -v node &> /dev/null; then
+            NODE_MAJOR=$(node --version | sed 's/v//' | cut -d. -f1)
+            if [ "$NODE_MAJOR" -ge 18 ] 2>/dev/null; then
+                NODE_OK=true
+                echo -e "${GREEN}✅ Node.js $(node --version) déjà installé${NC}"
+            fi
+        fi
+
+        if [ "$NODE_OK" = false ]; then
+            echo -e "${YELLOW}Installation de Node.js 20 via NodeSource...${NC}"
+            curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+            sudo apt-get install -y nodejs
+        fi
     elif command -v dnf &> /dev/null; then
         # Fedora / RHEL
         sudo dnf install -y python3 python3-pip nodejs npm \
